@@ -25,6 +25,7 @@ Rowaia is built on Fluentd with custom plugins:
 - Ruby 2.6+
 - Fluentd 1.12+
 - [LLMAlfr](https://github.com/bash0C7/llmalfr) gem
+- [fluent-plugin-llm-generate](https://github.com/bash0C7/fluent-plugin-llm-generate) gem
 - Ollama with Japanese language model
 
 ## Installation
@@ -35,8 +36,7 @@ git clone https://github.com/yourusername/rowaia.git
 cd rowaia
 
 # Install dependencies
-gem install fluentd
-gem install llmalfr
+bundle install
 
 # Install Ollama and language model
 # See https://ollama.ai for installation
