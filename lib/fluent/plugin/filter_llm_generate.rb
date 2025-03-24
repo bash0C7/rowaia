@@ -1,38 +1,70 @@
 require 'fluent/plugin/filter'
+require 'json'
+require 'timeout'
 require 'llmalfr'
 
-module Fluent::Plugin
-  class LlmGenerateFilter < Filter
-    Fluent::Plugin.register_filter('llm_generate', self)
+module Fluent
+  module Plugin
+    class LlmGenerateFilter < Filter
+      Fluent::Plugin.register_filter('llm_generate', self)
 
-    # Configuration parameters
-    config_param :model_name, :string, default: "hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest"
-    config_param :api_url, :string, default: "http://localhost:11434/api"
-    config_param :prompt_template, :string
-    config_param :field_name, :string, default: 'message'
-    config_param :output_field, :string, default: 'llm_output'
-
-    def configure(conf)
-      super
-    end
-
-    def filter(tag, time, record)
-      # Skip if input field doesn't exist
-      return record unless record[@field_name]
+      desc 'Ollama model name to use'
+      config_param :model_name, :string, default: 'hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest'
       
-      # Prepare prompt by replacing template variables
-      prompt = @prompt_template.gsub(/<%= record\["([^"]+)"\] %>/) do
-        record[$1] || ''
+      desc 'Ollama API URL'
+      config_param :api_url, :string, default: 'http://localhost:11434/api'
+      
+      desc 'Prompt to send to the LLM'
+      config_param :prompt, :string
+      
+      desc 'Input field name to extract content from'
+      config_param :input_field, :string, default: 'message'
+      
+      desc 'Output field name to store the LLM result'
+      config_param :output_field, :string, default: 'llm_output'
+      
+      desc 'Custom LLM options in JSON format'
+      config_param :options_json, :string, default: '{"temperature":0.6,"top_p":0.88,"top_k":40,"num_predict":2048,"repeat_penalty":1.2,"presence_penalty":0.2,"frequency_penalty":0.2,"stop":["\n\n","。\n"],"seed":0}'
+      
+      desc 'Timeout in seconds for LLM processing'
+      config_param :timeout, :integer, default: 300
+      
+      def configure(conf)
+        super
+        
+        # Parse options JSON
+        @options = JSON.parse(@options_json)
+        
+        # Initialize LLM processor
+        @processor = LLMAlfr::Processor.new(@model_name, @api_url)
       end
       
-      # Process with LLM
-      processor = LLMAlfr::Processor.new(@model_name, @api_url)
-      result = processor.process(prompt, record[@field_name])
-      
-      # Add result to record
-      record[@output_field] = result
-      
-      record
+      def filter(tag, time, record)
+        # Check if input field exists in the record
+        unless record.key?(@input_field)
+          log.debug("Input field '#{@input_field}' not found in record")
+          return record
+        end
+        
+        # Get the content to process
+        content = record[@input_field].force_encoding('UTF-8')
+        
+        # Process with LLM within timeout
+        begin
+          result = Timeout.timeout(@timeout) do
+            @processor.process(@prompt, content, @options)
+          end
+          record[@output_field] = result
+        rescue Timeout::Error
+          log.warn("LLM processing timed out for tag: #{tag}")
+          record[@output_field] = "Error: LLM processing timed out"
+        rescue => e
+          log.error("Error in LLM processing: #{e.class}: #{e.message}")
+          record[@output_field] = "Error: #{e.message}"
+        end
+        
+        record
+      end
     end
   end
 end

@@ -1,118 +1,89 @@
-# Rowaia - AI-powered Assistant for Remote Office Workers
+# Rowaia
 
-Rowaia is an AI agent system designed to help remote office workers automate information processing and decision-making using the OODA (Observe, Orient, Decide, Act) loop methodology.
+Rowaia (ロワイア) is an AI agent for remote office workers, designed to streamline information processing. The name combines "Remote Work + AI + Assistant".
 
-## Concept
+## Overview
 
-Rowaia automates the workflow of remote office workers by:
-
-1. **Observe**: Collecting information from notes, files, and other data sources
-2. **Orient**: Analyzing and summarizing collected information
-3. **Decide**: Evaluating the situation and prioritizing tasks
-4. **Act**: Providing notifications and guidance for action
+This system uses the "OODA loop" (Observe-Orient-Decide-Act) as its basic structure, with Fluentd as the core information stream processing engine. The system operates completely offline for privacy protection.
 
 ## Architecture
 
-Rowaia is built on Fluentd with custom plugins:
+Rowaia consists of two main Fluentd processes:
 
-- **in_context**: Input plugin that reads files and directories
-- **out_context**: Output plugin that summarizes data using LLM
-- **filter_llm_generate**: Filter plugin that processes data with LLM for decision making
-- **out_sstp**: Output plugin that sends notifications
+1. **Observe-Orient Process**: Collects information from various sources and analyzes it using local LLM
+2. **Decide-Act Process**: Prioritizes the analyzed information and presents notifications with action suggestions
 
 ## Requirements
 
-- Ruby 2.6+
-- Fluentd 1.12+
-- [LLMAlfr](https://github.com/bash0C7/llmalfr) gem
-- [fluent-plugin-llm-generate](https://github.com/bash0C7/fluent-plugin-llm-generate) gem
-- [fluent-plugin-sstp](https://github.com/bash0C7/fluent-plugin-sstp) gem
-- Ollama with Japanese language model
-- An SSTP-compatible client (like [SSP](http://ssp.shillest.net/)) for notifications
+- Ruby 3.4.1 or higher
+- Fluentd 1.12 or higher
+- [Ollama](https://ollama.ai/) for local LLM execution
+- A desktop assistant supporting SSTP (like SSP)
 
 ## Installation
 
+Clone the repository:
+
 ```bash
-# Clone repository
 git clone https://github.com/yourusername/rowaia.git
 cd rowaia
+```
 
-# Install dependencies
+Install dependencies:
+
+```bash
 bundle install
+```
 
-# Install Ollama and language model
-# See https://ollama.ai for installation
+Install Ollama and download the required model:
+
+```bash
+# Install Ollama from https://ollama.ai/
 ollama pull hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest
-
-# Install plugins
-gem build rowaia.gemspec
-gem install rowaia-0.1.0.gem
 ```
 
-## Configuration
-
-### Observe & Orient Phase
-
-```
-<source>
-  @type exec
-  command cat /path/to/your/files/*
-  format none
-  tag observation
-  run_interval 1800s  # 30 minutes
-</source>
-
-<match observation>
-  @type context
-  buffer_type memory
-  buffer_path /tmp/fluentd/buffer
-  output_path /tmp/fluentd/context
-  flush_interval 1800s  # 30 minutes
-</match>
-```
-
-### Decide & Act Phase
-
-```
-<source>
-  @type context
-  path /tmp/fluentd/context
-  tag decision
-  run_interval 1800s  # 30 minutes
-</source>
-
-<filter decision>
-  @type llm_generate
-  prompt_template I need to triage this information: <%= record["message"] %>. Categorize as 1:red, 2:yellow, 3:green, 4:black priority, and explain your reasoning.
-</filter>
-
-<match decision>
-  @type sstp
-  sstp_server 127.0.0.1
-  sstp_port 9801
-  sender Rowaia
-  script_template \h\s[8]<%= record["llm_output"] %> \uThoughts?\e
-</match>
-```
+Install a desktop assistant (e.g., SSP):
+Download from http://ssp.shillest.net/
 
 ## Usage
 
-Start Fluentd with your configurations:
+Start the Observe-Orient process:
 
 ```bash
-# Start Observe & Orient phase
 fluentd -c conf/observe_orient.conf
+```
 
-# Start Decide & Act phase in another terminal
+In another terminal, start the Decide-Act process:
+
+```bash
 fluentd -c conf/decide_act.conf
 ```
 
-## Customization
+## Components
 
-- Modify source paths in configuration to target your information sources
-- Adjust prompt templates for different analysis needs
-- Change notification format and target
+### Custom Fluentd Plugins
+
+- **in_context**: Input plugin to read information from files
+- **out_context**: Output plugin to process text with LLM and save results
+- **filter_llm_generate**: Filter plugin to analyze text with LLM
+- **out_sstp**: Output plugin to send desktop notifications via SSTP
+
+### Dependencies
+
+This project relies on the following gems:
+
+- fluentd (~> 1.12)
+- llmalfr
+- fluent-plugin-llm-generate
+- fluent-plugin-sstp
+
+## Configuration
+
+See the example configuration files in the `conf` directory:
+
+- `observe_orient.conf`: Configuration for the first process (information collection and analysis)
+- `decide_act.conf`: Configuration for the second process (prioritization and notification)
 
 ## License
 
-Apache-2.0
+Apache License, Version 2.0
