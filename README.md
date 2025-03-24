@@ -26,7 +26,9 @@ Rowaia is built on Fluentd with custom plugins:
 - Fluentd 1.12+
 - [LLMAlfr](https://github.com/bash0C7/llmalfr) gem
 - [fluent-plugin-llm-generate](https://github.com/bash0C7/fluent-plugin-llm-generate) gem
+- [fluent-plugin-sstp](https://github.com/bash0C7/fluent-plugin-sstp) gem
 - Ollama with Japanese language model
+- An SSTP-compatible client (like [SSP](http://ssp.shillest.net/)) for notifications
 
 ## Installation
 
