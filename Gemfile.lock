@@ -1,0 +1,73 @@
+GIT
+  remote: https://github.com/bash0C7/fluent-plugin-llm-generate.git
+  revision: 3eef9219660ca6bdb044bba4ac65cc519399f5df
+  specs:
+    fluent-plugin-llm-generate (0.1.0)
+      fluentd (>= 0.14.10, < 2)
+      llmalfr (~> 0.1.0)
+
+GIT
+  remote: https://github.com/bash0C7/fluent-plugin-sstp.git
+  revision: 737d9f7383aacb6e3558b2bf3e72cee9942c4c73
+  specs:
+    fluent-plugin-sstp (0.1.0)
+      fluentd (>= 0.14.10, < 2)
+
+GIT
+  remote: https://github.com/bash0C7/llmalfr.git
+  revision: c2c8c22107005f250d97881f3c1b262b117074cb
+  specs:
+    llmalfr (0.1.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base64 (0.2.0)
+    concurrent-ruby (1.3.5)
+    cool.io (1.9.0)
+    csv (3.3.3)
+    drb (2.2.1)
+    fluentd (1.18.0)
+      base64 (~> 0.2)
+      bundler
+      cool.io (>= 1.4.5, < 2.0.0)
+      csv (~> 3.2)
+      drb (~> 2.2)
+      http_parser.rb (>= 0.5.1, < 0.9.0)
+      logger (~> 1.6)
+      msgpack (>= 1.3.1, < 2.0.0)
+      serverengine (>= 2.3.2, < 3.0.0)
+      sigdump (~> 0.2.5)
+      strptime (>= 0.2.4, < 1.0.0)
+      tzinfo (>= 1.0, < 3.0)
+      tzinfo-data (~> 1.0)
+      webrick (~> 1.4)
+      yajl-ruby (~> 1.0)
+    http_parser.rb (0.8.0)
+    logger (1.6.6)
+    msgpack (1.8.0)
+    serverengine (2.4.0)
+      base64 (~> 0.1)
+      logger (~> 1.4)
+      sigdump (~> 0.2.2)
+    sigdump (0.2.5)
+    strptime (0.2.5)
+    tzinfo (2.0.6)
+      concurrent-ruby (~> 1.0)
+    tzinfo-data (1.2025.2)
+      tzinfo (>= 1.0.0)
+    webrick (1.9.1)
+    yajl-ruby (1.4.3)
+
+PLATFORMS
+  arm64-darwin-24
+  ruby
+
+DEPENDENCIES
+  fluent-plugin-llm-generate!
+  fluent-plugin-sstp!
+  fluentd (~> 1.12)
+  llmalfr!
+
+BUNDLED WITH
+   2.6.2
