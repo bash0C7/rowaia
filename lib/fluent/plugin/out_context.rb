@@ -7,7 +7,7 @@ module Fluent
     class ContextOutput < Output
       Fluent::Plugin.register_output('context', self)
 
-      helpers :compat_parameters, :buffer
+      helpers :compat_parameters
 
       desc 'Output path to write processed context'
       config_param :output_path, :string
@@ -26,14 +26,15 @@ module Fluent
         FileUtils.mkdir_p(@output_path) unless Dir.exist?(@output_path)
       end
 
-      def write(chunk)
-        tag = chunk.metadata.tag
-
-        # Collect all messages from the chunk
+      def process(tag, es)
+        # Collect all messages
         messages = []
-        chunk.each do |time, record|
+        es.each do |time, record|
           messages << record['message']
         end
+
+        # Skip processing if no messages
+        return if messages.empty?
 
         # Combine all messages into a single context
         full_context = messages.join("\n\n")
