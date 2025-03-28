@@ -19,6 +19,12 @@ GIT
   specs:
     llmalfr (0.1.0)
 
+PATH
+  remote: lib/fluent-plugin-context
+  specs:
+    fluent-plugin-context (0.1.0)
+      fluentd (>= 0.14.10, < 2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -64,6 +70,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  fluent-plugin-context!
   fluent-plugin-llm-generate!
   fluent-plugin-sstp!
   fluentd (~> 1.12)
