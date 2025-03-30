@@ -48,7 +48,12 @@ Install Ollama and download the required model:
 
 ```bash
 # Install Ollama from https://ollama.ai/
+
+# For Japanese language processing (larger model, ~8GB)
 ollama pull hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest
+
+# OR for a lightweight alternative (~1GB)
+ollama pull gemma3:1b
 ```
 
 Install a desktop assistant (e.g., SSP):
@@ -85,6 +90,11 @@ The system uses `llmalfr` to process text with local language models:
 - Information extraction
 - Prioritization
 - Transcription formatting
+
+Supported models:
+
+- **hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF**: Optimized for Japanese language processing (larger model, ~8GB)
+- **gemma3:1b**: Lightweight model for faster processing with lower resource requirements (~1GB)
 
 ### Input Sources
 
@@ -136,7 +146,11 @@ Example configuration:
 
 <match audio.raw>
   @type context
-  # LLM processing settings
+  message_key transcription
+  output_path /tmp/fluentd/context
+  model_name gemma3:1b
+  api_url http://localhost:11434/api
+  options_json {"num_ctx":4096, "num_predict":-1,"seed":-1}
 </match>
 ```
 
