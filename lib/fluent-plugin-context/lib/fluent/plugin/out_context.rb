@@ -7,11 +7,6 @@ module Fluent
     class ContextOutput < Output
       Fluent::Plugin.register_output('context', self)
 
-#      helpers :compat_parameters, :formatter, :inject, :event_emitter
-
-      # Support buffering
-#      helpers :buffer
-
       desc 'Output path to write processed context'
       config_param :output_path, :string
 
@@ -26,6 +21,8 @@ module Fluent
 
       desc 'Custom LLM options in JSON format'
       config_param :options_json, :string, default: '{"temperature":1.5,"top_p":0.88,"top_k":80,"num_predict":-1,"repeat_penalty":1.5,"presence_penalty":0.2,"frequency_penalty":0.2,"stop":["\n\n","。\n"],"seed":-1}'
+
+      config_param :message_key, :string, default: 'message'
 
       def configure(conf)
         super
@@ -42,7 +39,7 @@ module Fluent
         # Collect all messages from the chunk
         messages = []
         chunk.each do |time, record|
-          messages << record['message']
+          messages << record[@message_key]
         end
         
         return if messages.empty?
@@ -57,17 +54,20 @@ module Fluent
         processor = LLMAlfr::Processor.new(@model_name, @api_url)
         
         begin
-#          log.debug @prompt
-#          log.debug full_context.force_encoding('utf-8')
+          log.debug '===================================================='
+          log.debug full_context.force_encoding('utf-8')
           result = processor.process(@prompt, full_context.force_encoding('utf-8'), @options)
           
           # Write result to file
           log.debug result
-          File.open(File.join(@output_path, "#{tag}"), "a") { |f| f.puts(result) }
-          log.info("Successfully processed and wrote context for tag: #{tag}")
+          buf = "<summary>#{result}</summary><full_context>#{full_context}</full_context>"
+          File.open(File.join(@output_path, "#{tag}"), "a") { |f| f.puts(buf.gsub("\n",' ')) }
+          log.debug("Successfully processed and wrote context for tag: #{tag}")
         rescue => e
           log.error("Error processing context for tag: #{tag}", error: e.message, error_class: e.class.to_s)
           log.debug_backtrace(e.backtrace)
+        ensure
+          log.debug '===================================================='
         end
       end
 
@@ -75,10 +75,6 @@ module Fluent
       def buffer_section_stream_mode?
         false
       end
-
-#      def format(tag, time, record)
-#        [time, record].to_msgpack
-#      end
 
       # Multi-worker support
       def multi_workers_ready?
