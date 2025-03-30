@@ -158,10 +158,10 @@ Example configuration:
 
 ### LLM Prompt Testing CLI
 
-The project includes a command-line tool for interactive testing of LLM prompts without configuring the entire Fluentd pipeline:
+The project includes a command-line tool (located in the `tools/` directory) for interactive testing of LLM prompts without configuring the entire Fluentd pipeline:
 
 ```bash
-ruby rowaia_dev_cli.rb [options] OPTIONS_JSON PROMPT < input_file
+ruby tools/rowaia_dev_cli.rb [options] OPTIONS_JSON PROMPT < input_file
 ```
 
 #### Parameters:
@@ -180,13 +180,25 @@ ruby rowaia_dev_cli.rb [options] OPTIONS_JSON PROMPT < input_file
 
 ```bash
 # Basic usage
-echo "会議の記録" | ruby rowaia_dev_cli.rb '{"temperature":0.7}' "要約してください"
+echo "会議の記録" | ruby tools/rowaia_dev_cli.rb '{"temperature":0.7}' "要約してください"
 
 # Custom model
-cat meeting_notes.txt | ruby rowaia_dev_cli.rb '{"temperature":0.5,"num_predict":512}' "重要な事項を抽出" --model_name "hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest"
+cat meeting_notes.txt | ruby tools/rowaia_dev_cli.rb '{"temperature":0.5,"num_predict":512}' "重要な事項を抽出" --model_name "hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest"
 
 # Custom API endpoint
-echo "今日のタスク" | ruby rowaia_dev_cli.rb '{"temperature":0.6}' "優先順位を付けてください" --api_url "http://192.168.1.100:11434/api"
+echo "今日のタスク" | ruby tools/rowaia_dev_cli.rb '{"temperature":0.6}' "優先順位を付けてください" --api_url "http://192.168.1.100:11434/api"
+```
+
+#### Multiple Prompt Testing Script
+
+The `tools/run_rowaia_dev_cli.sh` script allows you to test multiple prompts against the same context file:
+
+```bash
+# Run the script with default settings
+./tools/run_rowaia_dev_cli.sh
+
+# Make it executable first if needed
+chmod +x tools/run_rowaia_dev_cli.sh
 ```
 
 This tool is useful for:
@@ -194,6 +206,7 @@ This tool is useful for:
 - Testing different LLM parameters
 - Quick validation of model responses
 - Debugging without Fluentd setup
+- Comparing multiple prompt variations
 
 ## Dependencies
 
