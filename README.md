@@ -154,6 +154,47 @@ Example configuration:
 </match>
 ```
 
+## Development Tools
+
+### LLM Prompt Testing CLI
+
+The project includes a command-line tool for interactive testing of LLM prompts without configuring the entire Fluentd pipeline:
+
+```bash
+ruby rowaia_dev_cli.rb [options] OPTIONS_JSON PROMPT < input_file
+```
+
+#### Parameters:
+
+- `OPTIONS_JSON`: JSON string with LLM processing options
+- `PROMPT`: The prompt/instruction for the LLM
+- Standard input (`stdin`): Used as the context for processing
+
+#### Options:
+
+- `--model_name MODEL`: Specify the model name (default: gemma3:1b)
+- `--api_url URL`: Specify the Ollama API URL (default: http://localhost:11434/api)
+- `-h`, `--help`: Display help information
+
+#### Example Usage:
+
+```bash
+# Basic usage
+echo "会議の記録" | ruby rowaia_dev_cli.rb '{"temperature":0.7}' "要約してください"
+
+# Custom model
+cat meeting_notes.txt | ruby rowaia_dev_cli.rb '{"temperature":0.5,"num_predict":512}' "重要な事項を抽出" --model_name "hf.co/elyza/Llama-3-ELYZA-JP-8B-GGUF:latest"
+
+# Custom API endpoint
+echo "今日のタスク" | ruby rowaia_dev_cli.rb '{"temperature":0.6}' "優先順位を付けてください" --api_url "http://192.168.1.100:11434/api"
+```
+
+This tool is useful for:
+- Prompt engineering and optimization
+- Testing different LLM parameters
+- Quick validation of model responses
+- Debugging without Fluentd setup
+
 ## Dependencies
 
 This project relies on the following gems:
